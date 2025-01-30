@@ -1,57 +1,150 @@
+import os
+import argparse 
 import json
+import csv
+from urllib.parse import urlparse
+from typing import *
+import random
 from indexer.trees.avl_tree import AVLTreeIndex
 from indexer.trees.bst_index import BinarySearchTreeIndex
 from indexer.util.timer import timer
 from indexer.abstract_index import AbstractIndex
+from utils.exp2csv import log_timing_data
+from utils.expsets import generate_experiment_datasets
 
 
+# parses a json file
+def process_file(json_data: Dict[str, Any]) -> Dict[str, Any]:
+    title = json_data.get("title")
+    full_url = json_data.get("url")
+    if full_url:
+        domain_url = urlparse(full_url).netloc # source: ChatGPT, this made it easier to get the domain by identifying the network location
+    author = json_data.get("author")
+    preprocessed_text = json_data.get("preprocessed_text")
+    # tokenize title and add to preprocessed_text
+    title_tokens = tokenize(title)
+    preprocessed_text.extend(title_tokens)
+    # tokenize author last name (if present) and add to preprocessed_text
+    if author:
+        author_tokens = tokenize(author)
+        preprocessed_text.extend(author_tokens)
+        
+    return {
+        "title": title,
+        "url": domain_url,
+        "author": author,
+        "preprocessed_text": preprocessed_text
+    }
+
+# crawls through files in the path, extracts metadata, and indexes them into the particular index structure
 def index_files(path: str, index: AbstractIndex) -> None:
-    # path should contain the location of the news articles you want to parse
     if path is not None:
-        print(f"path = {path}")
+        print(f"path = {path}") # as long as the directory actually exists this should print, just a sanity check
 
-    # a sample json news article.  assume this is in a file named sample.json
-    sample_filename = "sample.json"
-    sample_json = """
-        {
-            "title": "Some article",
-            "text": "here is the text of a sample news article",
-            "preprocessed_text": ["here", "text", "sample", "news", "article"]
-        }
-    """
-
-    # extract the preprocessed_text words and add them to the index with
-    # sample.json as the file name
-    the_json = json.loads(sample_json)
-    words = the_json["preprocessed_text"]
-
-    for word in words:
-        index.insert(word, sample_filename)
-
-
-# A simple demo of how the @timer decoration can be used
-@timer
-def loopy_loop():
-    total = sum((x for x in range(0, 1000000)))
+    for root, subs, files in os.walk(path): # recursively go through the directory 
+        for file in files: 
+            if file.endswith('.json'):  # only for the .json files just in case, also just sanity check
+                file_path = os.path.join(root, file) # does: /top_folder/wtv_sub_folder(s) += /filename.json
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    try:
+                        json_data = json.load(f) # reads json file
+                        metadata = process_file(json_data) # parses into python dictionary with relevant info
+                        for word in set(metadata["preprocessed_text"]): # only indexes the unique words just for convenience
+                            index.insert(word, file) # insert the k,v into the index structure
+                    except json.JSONDecodeError: # source: ChatGPT for if the json couldn't be read for troubleshooting
+                        print(f"Error decoding JSON in file: {file_path}")
+                        
+@timer                        
+def search(index,search_set):
+    index.search(search_set)
 
 
 def main():
-    # You'll need to change this to be the absolute path to the root folder
-    # of the dataset
-    data_directory = "/location/of/downloaded/dataset/of/newsarticles"
-
-    # Here, we are creating a sample binary search tree index object
-    # and sending it to the index_files function
-    bst_index = BinarySearchTreeIndex()
-    index_files(data_directory, bst_index)
+    # initialize argument parser
+    parser = argparse.ArgumentParser(description="Index news articles using different data structures.")
+    
+    # setting up the command-line arguments
+    parser.add_argument(
+        '-d', '--dataset', 
+        type=str, 
+        help="Path to the root folder of the dataset."
+    ) # when running from terminal we can now do python assign_01.py -d path.json to pass the dataset
+    
+    parser.add_argument(
+        '-p', '--pickle', 
+        type=str, 
+        help="Path to the pickle file for saving or loading the index."
+    ) # when constructing an new index structure we can save to a pickle by doing python assign_01.py -d path.json -p index.pkl
+    
+    parser.add_argument(
+        '--load', 
+        action='store_true', 
+        help="Load the index from the pickle file instead of creating a new one."
+    ) # when referring to/running experiments for an index structure that is already constructed we can do python assign_01.py --load -p index.pkl
+    
+    # saves info passed into terminal run command
+    args = parser.parse_args()
+    
+    # loads whichever index file is specified if --load command is used 
+    if args.load:
+        if args.pickle:
+            index = load_index_from_pickle(args.pickle)
+        else:
+            print("Error: --load requires a --pickle argument.")
+    else:
+       # asks which index structure the user wants to construct if they don't choose to load a pickle file
+        print("Select an indexing structure:")
+        print("1 - Binary Search Tree (BST)")
+        print("2 - AVL Tree")
+        print("3 - Hash Table")
+    #     print("4 - Our Structure")
+        choice = input("Enter the number corresponding to your choice: ").strip()
+    
+        # ** Construct the selected index **
+        if choice == "1":
+            choice = "BST"
+            index = BinarySearchTreeIndex()
+        elif choice == "2":
+            choice = "AVL"
+            index = AVLTreeIndex()
+        elif choice == "3":
+            choice = "Hash"
+            index = HashTableIndex()
+    #     elif choice == "4":
+    #        choice = "Mystery"
+    #         index = Ours()
+        else:
+            print("Invalid choice.")
+    
+        # constructs whichever index structure is indicated
+        if args.dataset:
+            index_files(args.dataset, index)
+        else:
+            print("Error: --dataset argument is required for indexing.")
+    
+        # saves new index structure to a pickle file with whatever name was provided in the terminal
+        if args.pickle:
+            save_index_to_pickle(index, args.pickle)
 
     # As a gut check, we are printing the keys that were added to the
-    # index in order.
-    print(bst_index.get_keys_in_order())
+    # index in order
+    print(index.get_keys_in_order())
+    tokens = len(index.get_keys_in_order())
 
-    # quick demo of how to use the timing decorator included
-    # in indexer.util
-    loopy_loop()
+
+    for i in range(10): 
+        datasets, n = generate_experiment_datasets(index)
+        for dataset in datasets:
+            log_timing_data(
+                index_type=choice,
+                uid=i,
+                num_docs=10000, # not really sure how we find this?? is this changing?
+                num_tokens=tokens, 
+                search_set_size=n, 
+                search_function=search,
+                index=index,
+                search_set = dataset
+            )
 
 
 if __name__ == "__main__":

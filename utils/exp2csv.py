@@ -8,6 +8,7 @@ Created on Wed Jan 29 23:46:45 2025
 
 import csv
 import os
+import numpy as np
 
 CSV_FILENAME = "timing_data.csv"
 
@@ -15,10 +16,11 @@ COMPUTE_PROC_TYPE = "Apple M1"
 PRIMARY_MEMORY_SIZE = 8
 
 
-def log_timing_data(index_type, uid, num_docs, num_tokens, search_set_size,search_function,index):
+def log_timing_data(index_type, uid, num_docs, num_tokens, search_set_size,search_function,index,search_set):
     run_id = uid
 
-    results, search_time = search_function(index)
+    results, search_times = search_function(index,search_set)
+    search_time = np.sum(search_times)
     
 
     data = [

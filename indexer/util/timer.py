@@ -28,6 +28,6 @@ def timer(func: Callable[..., Any]) -> Callable[..., Any]:
     end_time = time.process_time_ns()
     total_time_ns = end_time - start_time
     total_time_ms = total_time_ns / float(1000000)
-    print(f'Function {func.__name__}{args} {kwargs} Took {total_time_ns} ns OR {total_time_ms} ms')
+    #print(f'Function {func.__name__}{args} {kwargs} Took {total_time_ns} ns OR {total_time_ms} ms')
     return result, total_time_ns
   return timeit_wrapper

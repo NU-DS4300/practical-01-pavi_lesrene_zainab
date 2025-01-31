@@ -1,17 +1,27 @@
 import os
 import argparse 
 import json
-import csv
 from urllib.parse import urlparse
 from typing import *
-import random
 from indexer.trees.avl_tree import AVLTreeIndex
 from indexer.trees.bst_index import BinarySearchTreeIndex
+from indexer.maps.hash_map import HashMapIndex
 from indexer.util.timer import timer
 from indexer.abstract_index import AbstractIndex
 from utils.exp2csv import log_timing_data
 from utils.expsets import generate_experiment_datasets
+from indexer.util.pickle_utils import save_index_to_pickle, load_index_from_pickle
 
+
+# turns a string into list of tokens
+# will be used to turn title & author names into processed text
+def tokenize(text: str): #-> List[str]:
+    if not text: 
+        return [] # gives us an empty list if no text is provided
+    text = text.lower() # converts the text to lowercase
+    tokens = text.split() # splits the text by whitespace so each word is a token
+    cleaned_tokens = [''.join(char for char in token if char.isalnum()) for token in tokens] # keeps only alphanumeric characters from each token
+    return [token for token in cleaned_tokens if token] # filters out empty tokens (which could happen if there were non-alphanumeric-only inputs)
 
 # parses a json file
 def process_file(json_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -54,9 +64,31 @@ def index_files(path: str, index: AbstractIndex) -> None:
                     except json.JSONDecodeError: # source: ChatGPT for if the json couldn't be read for troubleshooting
                         print(f"Error decoding JSON in file: {file_path}")
                         
-@timer                        
-def search(index,search_set):
-    index.search(search_set)
+                       
+def timed_search(index, word):
+    # just here so we can time the search for each word 
+    @timer
+    def search_word():
+        return index.search(word)
+
+    result, time_ns = search_word()  # Capture both result and execution time
+    return result, time_ns  # Return both values
+
+def search(index, search_set):
+    valid_kvs = {}
+    search_times = []  # List to store search times
+
+    for dataset in search_set:
+        for word in dataset:
+            result, time_ns = timed_search(index, word)  # Capture search time
+            search_times.append(time_ns)  # Store timing result
+            if result:
+                valid_kvs[word] = result
+            else:
+                continue
+
+    return valid_kvs, search_times  # Return results and timing data
+                
 
 
 def main():
@@ -89,6 +121,25 @@ def main():
     if args.load:
         if args.pickle:
             index = load_index_from_pickle(args.pickle)
+            print("Select the indexing structure you loaded:")
+            print("1 - Binary Search Tree (BST)")
+            print("2 - AVL Tree")
+            print("3 - Hash Table")
+        #     print("4 - Our Structure")
+            choice = input("Enter the number corresponding to your choice: ").strip()
+        
+            # construct the selected index
+            if choice == "1":
+                choice = "BST"
+            elif choice == "2":
+                choice = "AVL"
+            elif choice == "3":
+                choice = "Hash"
+        #     elif choice == "4":
+        #        choice = "Mystery"
+        #         index = Ours()
+            else:
+                print("Invalid choice.")
         else:
             print("Error: --load requires a --pickle argument.")
     else:
@@ -100,7 +151,7 @@ def main():
     #     print("4 - Our Structure")
         choice = input("Enter the number corresponding to your choice: ").strip()
     
-        # ** Construct the selected index **
+        # construct the selected index
         if choice == "1":
             choice = "BST"
             index = BinarySearchTreeIndex()
@@ -109,7 +160,7 @@ def main():
             index = AVLTreeIndex()
         elif choice == "3":
             choice = "Hash"
-            index = HashTableIndex()
+            index = HashMapIndex()
     #     elif choice == "4":
     #        choice = "Mystery"
     #         index = Ours()
@@ -137,14 +188,15 @@ def main():
         for dataset in datasets:
             log_timing_data(
                 index_type=choice,
-                uid=i,
-                num_docs=10000, # not really sure how we find this?? is this changing?
+                uid=i, # need to find a new way to generate uid
+                num_docs=306242, 
                 num_tokens=tokens, 
                 search_set_size=n, 
                 search_function=search,
                 index=index,
                 search_set = dataset
             )
+            
 
 
 if __name__ == "__main__":

@@ -7,6 +7,8 @@ Created on Thu Jan 30 01:00:40 2025
 """
 from typing import *
 import random
+from indexer.abstract_index import AbstractIndex
+import string
 
 # generates a random n that is a multiple of 4 and is greater than or equal to 4000
 def generate_n(seed=42): #-> int

@@ -8,6 +8,7 @@ Created on Thu Jan 30 00:56:32 2025
 
 import pickle
 from typing import *
+from indexer.abstract_index import AbstractIndex
 
 def save_index_to_pickle(index: AbstractIndex, pickle_path: str):
     with open(pickle_path, 'wb') as f:

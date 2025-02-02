@@ -18,7 +18,8 @@ class AVLTreeIndex(BinarySearchTreeIndex):
     
     def __init(self):
        super().__init__()
-       self.root: Optional[AVLNode] = None 
+       self.root: Optional[AVLNode] = None
+
     
     def _height(self, node: Optional[AVLNode]) -> int:
         """
@@ -30,17 +31,14 @@ class AVLTreeIndex(BinarySearchTreeIndex):
         Returns:
         - int: The height of the AVLNode. If the node is None, returns 0.
         """
-        
-        # TODO: make sure to update height appropriately in the
-        # recursive insert function.
-        
         if not node:
             return 0
         return node.height
+    
 
     def _rotate_right(self, y: AVLNode) -> AVLNode:
         """
-        Performs a right rotation on the AVL tree.
+        Performs a right rotation on the AVL tree. For when too many nodes are inserted left.
 
         Args:
             y (AVLNode): The node to be rotated.
@@ -48,10 +46,20 @@ class AVLTreeIndex(BinarySearchTreeIndex):
         Returns:
             AVLNode: The new root of the rotated subtree.
         """
-        
-        # TODO: implement the right rotation for AVL Tree
+        #current = new node just added
+        current = y.left #y > current
+        t2 = current.right #T2 > current and T2 < y
 
-        pass
+        #rotation: now current will be the root of the tree
+        current.right = y 
+        y.left = t2 
+
+        #update heights
+        y.height = self._tree_height(y)
+        current.height = self._tree_height(current)
+
+        return current
+
 
     def _rotate_left(self, x: AVLNode) -> AVLNode:
         """
@@ -61,10 +69,21 @@ class AVLTreeIndex(BinarySearchTreeIndex):
         Returns:
             AVLNode: The new root of the subtree after rotation.
         """
+
+        #current = current node just added to the tree        
+        current = x.right #current > x
+        t2 = current.left #T2 < current and T2 > x
         
-        # TODO: implement the left rotation for AVL Tree
-        
-        pass
+        #rotation: now current will be the root of the tree
+        current.left = x
+        x.right = t2 
+
+        #update heights
+        x.height = self._tree_height(x)
+        current.height = self._tree_height(current)
+
+        return current
+
 
     def _insert_recursive(self, current: Optional[AVLNode], key: Any, value: Any) -> AVLNode:
         """
@@ -76,15 +95,36 @@ class AVLTreeIndex(BinarySearchTreeIndex):
         Returns:
             AVLNode: The updated AVL tree with the new node inserted.
         """
-        # TODO: Implement a proper recursive insert function for an
-        # AVL tree including updating height and balancing if a
-        # new node is inserted. 
-        
-        # TODO: Remove or comment out this line once you've implemented
-        # the AVL insert functionality 
+
+        #normal binary tree to insert the node
+        if not current:
+            node = AVLNode(key)
+            node.add_value(value)
+            return node
         current = super()._insert_recursive(current, key, value)
- 
-        return current
+        
+        current.height = self._tree_height(current) #update height of tree @ current node
+        balance_factor = self._height(current.right) - self._height(current.left)  #find balance factor @ current node
+
+        #determine if any rotations of the tree with the newly added node are needed based on the above calculated balance factor:
+        #1. too many nodes inserted to the left (LL and LR cases):
+        if balance_factor <= -2:    
+            if key < current.left.key: #LL
+                return self._rotate_right(current)
+            elif current.key > current.left.key: #LR 
+                return self._rotate_right(current) 
+            else: current.right.add_value(value)
+
+        #2. too many nodes inserted to the right (RR and RL cases):
+        elif balance_factor >= 2:
+            if key > current.right.key: #RR
+                return self._rotate_left(current)
+            elif key < current.right.key: #RL
+                return self._rotate_right(current)
+            else: current.left.add_value(value)
+        else:
+            return current
+        
 
     def insert(self, key: Any, value: Any) -> None:
         """
@@ -102,7 +142,8 @@ class AVLTreeIndex(BinarySearchTreeIndex):
             self.root = AVLNode(key)
             self.root.add_value(value)
         else:
-            self.root = self._insert_recursive(self.root, key, value)
+            super().insert(key, value)
+
 
     # def _inorder_traversal(self, current: Optional[AVLNode], result: List[Any]) -> None:
     #     if current is None:
@@ -116,3 +157,5 @@ class AVLTreeIndex(BinarySearchTreeIndex):
     #     keys: List[Any] = [] 
     #     self._inorder_traversal(self.root, keys)
     #     return keys
+    
+

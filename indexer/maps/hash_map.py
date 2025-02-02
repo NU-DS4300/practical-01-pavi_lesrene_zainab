@@ -34,9 +34,6 @@ class HashMapIndex(AbstractIndex):
             if k == term:
               return v
         return None
-
-    def count_keys(self) -> int:
-        return len(self.buckets) # need it to return all non-None members
     
     def get_keys_in_order(self):
         keys = []
@@ -45,6 +42,9 @@ class HashMapIndex(AbstractIndex):
                 k,v = element 
                 keys.append(k)
         return sorted(keys)
+    
+    def count_keys(self) -> int:
+        return len(self.get_keys_in_order())
     
     def get_avg_value_list_len(self):
         list_len_sum = 0

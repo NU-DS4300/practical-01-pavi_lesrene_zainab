@@ -71,19 +71,37 @@ def timed_search(index, word):
     def search_word():
         return index.search(word)
 
-    result, time_ns = search_word()  # Capture both result and execution time
-    return result, time_ns  # Return both values
+    result, time_ns = search_word()  # gets both result and execution time
+    return result, time_ns  
 
 def search(index, search_set):
     valid_kvs = {}
-    search_times = []  # List to store search times
-
+    search_times = [] 
+    
     for dataset in search_set:
         for word in dataset:
-            result, time_ns = timed_search(index, word)  # Capture search time
-            search_times.append(time_ns)  # Store timing result
+            split_words = word.split()
+            word_count = len(split_words)  # Get word count once for efficiency
+    
+            if word_count == 3:
+                r1, time_ns_1 = timed_search(index, split_words[0])
+                r2, time_ns_2 = timed_search(index, split_words[1])
+                r3, time_ns_3 = timed_search(index, split_words[2])
+                result = list(set(r1) & set(r2) & set(r3))  # Find common docs
+                search_times.append(time_ns_1 + time_ns_2 + time_ns_3)
+    
+            elif word_count == 2:
+                r1, time_ns_1 = timed_search(index, split_words[0])
+                r2, time_ns_2 = timed_search(index, split_words[1])
+                result = list(set(r1) & set(r2))  # Find common docs
+                search_times.append(time_ns_1 + time_ns_2)
+    
+            else:  # Single-word case
+                result, time_ns = timed_search(index, word)  
+                search_times.append(time_ns)  
+    
             if result:
-                valid_kvs[word] = result
+                valid_kvs[word] = result 
             else:
                 continue
 
@@ -128,7 +146,7 @@ def main():
         #     print("4 - Our Structure")
             choice = input("Enter the number corresponding to your choice: ").strip()
         
-            # construct the selected index
+            # just for record-keeping purposes
             if choice == "1":
                 choice = "BST"
             elif choice == "2":

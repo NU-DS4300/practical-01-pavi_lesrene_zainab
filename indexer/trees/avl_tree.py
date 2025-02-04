@@ -47,7 +47,6 @@ class AVLTreeIndex(BinarySearchTreeIndex):
         Returns:
             AVLNode: The new root of the rotated subtree.
         """
-        
         #current = new node just added
         current = y.left #y > current
         t2 = current.right #T2 > current and T2 < y
@@ -116,7 +115,7 @@ class AVLTreeIndex(BinarySearchTreeIndex):
             elif current.key > current.left.key: #LR 
                 current.left = self._rotate_left(current.left)
                 return self._rotate_right(current) 
-            else: current.left.add_value(value)
+            else: current.add_value(value)
 
         #2. too many nodes inserted to the right (RR and RL cases):
         elif balance_factor <= -2:
@@ -125,7 +124,7 @@ class AVLTreeIndex(BinarySearchTreeIndex):
             elif key < current.right.key: #RL
                 current.right = self._rotate_right(current.right)
                 return self._rotate_left(current)
-            else: current.right.add_value(value)
+            else: current.add_value(value)
         else:
             return current
         

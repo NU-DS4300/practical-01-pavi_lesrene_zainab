@@ -1,11 +1,13 @@
 import os
 import argparse 
 import json
+import uuid
 from urllib.parse import urlparse
 from typing import *
 from indexer.trees.avl_tree import AVLTreeIndex
 from indexer.trees.bst_index import BinarySearchTreeIndex
 from indexer.maps.hash_map import HashMapIndex
+from indexer.arrays.array import SortedArrayIndex
 from indexer.util.timer import timer
 from indexer.abstract_index import AbstractIndex
 from utils.exp2csv import log_timing_data
@@ -81,22 +83,22 @@ def search(index, search_set):
     for dataset in search_set:
         for word in dataset:
             split_words = word.split()
-            word_count = len(split_words)  # Get word count once for efficiency
+            word_count = len(split_words)  
     
             if word_count == 3:
                 r1, time_ns_1 = timed_search(index, split_words[0])
                 r2, time_ns_2 = timed_search(index, split_words[1])
                 r3, time_ns_3 = timed_search(index, split_words[2])
-                result = list(set(r1) & set(r2) & set(r3))  # Find common docs
+                result = list(set(r1) & set(r2) & set(r3))  # finds common docs
                 search_times.append(time_ns_1 + time_ns_2 + time_ns_3)
     
             elif word_count == 2:
                 r1, time_ns_1 = timed_search(index, split_words[0])
                 r2, time_ns_2 = timed_search(index, split_words[1])
-                result = list(set(r1) & set(r2))  # Find common docs
+                result = list(set(r1) & set(r2))  # find common docs
                 search_times.append(time_ns_1 + time_ns_2)
     
-            else:  # Single-word case
+            else:  # single-word case
                 result, time_ns = timed_search(index, word)  
                 search_times.append(time_ns)  
     
@@ -105,7 +107,7 @@ def search(index, search_set):
             else:
                 continue
 
-    return valid_kvs, search_times  # Return results and timing data
+    return valid_kvs, search_times  # return results and timing data
                 
 
 
@@ -143,7 +145,7 @@ def main():
             print("1 - Binary Search Tree (BST)")
             print("2 - AVL Tree")
             print("3 - Hash Table")
-        #     print("4 - Our Structure")
+            print("4 - Array")
             choice = input("Enter the number corresponding to your choice: ").strip()
         
             # just for record-keeping purposes
@@ -153,9 +155,8 @@ def main():
                 choice = "AVL"
             elif choice == "3":
                 choice = "Hash"
-        #     elif choice == "4":
-        #        choice = "Mystery"
-        #         index = Ours()
+            elif choice == "4":
+               choice = "Array"
             else:
                 print("Invalid choice.")
         else:
@@ -179,9 +180,9 @@ def main():
         elif choice == "3":
             choice = "Hash"
             index = HashMapIndex()
-    #     elif choice == "4":
-    #        choice = "Mystery"
-    #         index = Ours()
+        elif choice == "4":
+           choice = "Array"
+           index = SortedArrayIndex()
         else:
             print("Invalid choice.")
     
@@ -206,7 +207,7 @@ def main():
         for dataset in datasets:
             log_timing_data(
                 index_type=choice,
-                uid=i, # need to find a new way to generate uid
+                uid=uuid.uuid1(), 
                 num_docs=306242, 
                 num_tokens=tokens, 
                 search_set_size=n, 

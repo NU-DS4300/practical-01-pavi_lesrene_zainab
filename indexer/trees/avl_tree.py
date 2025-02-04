@@ -145,17 +145,17 @@ class AVLTreeIndex(BinarySearchTreeIndex):
             super().insert(key, value)
 
 
-    # def _inorder_traversal(self, current: Optional[AVLNode], result: List[Any]) -> None:
-    #     if current is None:
-    #         return
+    def _inorder_traversal(self, current: Optional[AVLNode], result: List[Any]) -> None:
+        if current is None:
+            return
         
-    #     self._inorder_traversal(current.left, result)
-    #     result.append(current.key)
-    #     self._inorder_traversal(current.right, result)
-   
-    # def get_keys(self) -> List[Any]:
-    #     keys: List[Any] = [] 
-    #     self._inorder_traversal(self.root, keys)
-    #     return keys
+        self._inorder_traversal(current.left, result)
+        result.append(current.key)
+        self._inorder_traversal(current.right, result)
+      
+    def get_keys(self) -> List[Any]:
+        keys: List[Any] = [] 
+        self._inorder_traversal(self.root, keys)
+        return keys
     
 

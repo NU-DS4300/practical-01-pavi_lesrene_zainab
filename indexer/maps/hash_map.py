@@ -7,12 +7,17 @@ class HashMapIndex(AbstractIndex):
         super().__init__()
         # self.hash_map = {} 
         self.bucket_size = size 
-        self.buckets = [None for _ in range(self.bucket_size)]
+        self.buckets = [None for _ in range(self.bucket_size)] # used Nones since I wasn't sure if I could generate empty tuples to hold space in the table
+        self.num_occupied = 0 # to keep track of non-None elements of the hash table for resizing purposes
         
-    def __iter__(self):
+    def __iter__(self): # how to iterate/traverse through the hash map
         for element in self.buckets:
-            for k,v in element:  # Each bucket contains (term, [doc_ids])
+            for k,v in element:  # each bucket contains (term, [doc_ids])
                 yield k
+                
+    def __resize__(self): # makes the table bigger if necessary
+        self.buckets.extend([None] * self.bucket_size) # doubles the size of the table 
+        self.bucket_size = len(self.bucket_size) # updates the size of the table to reflect the doubling
         
     def hash_function(self,term):
         pos_hex = hashlib.sha256(term.encode("utf-8"))
@@ -22,14 +27,18 @@ class HashMapIndex(AbstractIndex):
     def insert(self, term, document_id):
         pos = self.hash_function(term)
         
-        if self.buckets[pos] is not None and self.buckets[pos][0] == term:
+        if self.buckets[pos] is not None and self.buckets[pos][0] == term: #if the word is already in the table, add the file to that word's doc list
             self.buckets[pos][1].append(document_id)
         else:
-           self.buckets[pos] = (term, [document_id])  
+           self.buckets[pos] = (term, [document_id]) # if the word isn't indexed already replace the None with (term, [doc_ids]) 
+           self.num_occupied += 1 # update the occupancy counter
+        
+        if self.num_occupied / self.bucket_size > 0.9:
+            self.__resize__() # if the occupancy of the table is over 90%, resize the table
 
     def search(self, term):
-        pos = self.hash_function(term)
-        if self.buckets[pos] is not None:
+        pos = self.hash_function(term) # the position where we expect to find this word
+        if self.buckets[pos] is not None: # if the word is indexed, return it's doc list
             k,v = self.buckets[pos]
             if k == term:
               return v

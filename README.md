@@ -1,3 +1,42 @@
+##▶️ Execution Instructions
+
+###Saving an Index to a Pickle File
+To index the dataset and save the structure to a pickle file, run:
+<pre><code>python /Users/lesrene/Desktop/DS4300/practical-01-pavi_lesrene_zainab/assign_01.py -d filepath/USFinancialNewsArticles-preprocessed -p index.pkl</code></pre>
+
+###Parameters:
+<ul>
+    <li><code>-d filepath/USFinancialNewsArticles-preprocessed</code> → Specifies the dataset location.</li>
+    <li><code>-p index.pkl</code> → Saves the index structure to this pickle file.</li>
+</ul>
+
+###Loading an Index and Running Experiments
+To load a previously saved index and run experiments, use:
+<pre><code>python filepath/assign_01.py --load -p index.pkl</code></pre>
+
+
+##📚 Choosing an Indexing Structure
+
+When the program starts, you will be prompted to <strong>select an indexing structure</strong>.
+
+<ul>
+    <li><strong>If a pickle file (<code>-p index.pkl</code>) is provided,</strong><br>
+        → Choose the number corresponding to the index structure stored in the pickle file.</li>
+    <li><strong>If no pickle file is provided,</strong><br>
+        → You can freely select any available indexing structure for querying.</li>
+</ul>
+
+This ensures compatibility between the loaded index and the queried structure.
+
+
+##⚠️ Additional Notes
+<ul>
+    <li>✅ Ensure all dependencies are installed before running the program.</li>
+    <li>✅ The dataset should be <strong>preprocessed</strong> and stored in the specified filepath.</li>
+    <li>✅ If issues arise, <strong>verify that the provided pickle file matches the expected index structure</strong>.</li>
+</ul>
+
+
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/x2sAhQ2z)
 # DS4300 - Spring 2025 - Practical #1 - Index It
 

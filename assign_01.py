@@ -82,6 +82,7 @@ def search(index, search_set):
     
     for dataset in search_set:
         for word in dataset:
+            word = word.lower()
             split_words = word.split()
             word_count = len(split_words)  
     
@@ -167,7 +168,7 @@ def main():
         print("1 - Binary Search Tree (BST)")
         print("2 - AVL Tree")
         print("3 - Hash Table")
-    #     print("4 - Our Structure")
+        print("4 - Array")
         choice = input("Enter the number corresponding to your choice: ").strip()
     
         # construct the selected index
@@ -200,8 +201,9 @@ def main():
     # index in order
     print(index.get_keys_in_order())
     tokens = len(index.get_keys_in_order())
-
-
+    
+    """
+    
     for i in range(10): 
         datasets, n = generate_experiment_datasets(index)
         for dataset in datasets:
@@ -215,7 +217,9 @@ def main():
                 index=index,
                 search_set = dataset
             )
-            
+
+"""       
+    
 
 
 if __name__ == "__main__":

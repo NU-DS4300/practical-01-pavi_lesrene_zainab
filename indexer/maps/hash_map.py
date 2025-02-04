@@ -17,7 +17,7 @@ class HashMapIndex(AbstractIndex):
                 
     def __resize__(self): # makes the table bigger if necessary
         self.buckets.extend([None] * self.bucket_size) # doubles the size of the table 
-        self.bucket_size = len(self.bucket_size) # updates the size of the table to reflect the doubling
+        self.bucket_size = len(self.buckets) # updates the size of the table to reflect the doubling
         
     def hash_function(self,term):
         pos_hex = hashlib.sha256(term.encode("utf-8"))
@@ -28,7 +28,8 @@ class HashMapIndex(AbstractIndex):
         pos = self.hash_function(term)
         
         if self.buckets[pos] is not None and self.buckets[pos][0] == term: #if the word is already in the table, add the file to that word's doc list
-            self.buckets[pos][1].append(document_id)
+            if document_id not in self.buckets[pos][1]:
+                self.buckets[pos][1].append(document_id) 
         else:
            self.buckets[pos] = (term, [document_id]) # if the word isn't indexed already replace the None with (term, [doc_ids]) 
            self.num_occupied += 1 # update the occupancy counter

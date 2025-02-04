@@ -112,7 +112,7 @@ class AVLTreeIndex(BinarySearchTreeIndex):
         if balance_factor >= 2:    
             if key < current.left.key: #LL
                 return self._rotate_right(current)
-            elif current.key > current.left.key: #LR 
+            elif key > current.left.key: #LR 
                 current.left = self._rotate_left(current.left)
                 return self._rotate_right(current) 
             else: current.add_value(value)

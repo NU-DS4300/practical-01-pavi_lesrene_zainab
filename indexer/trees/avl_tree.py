@@ -1,3 +1,4 @@
+import string
 from typing import List, Optional, Any
 
 from indexer.trees.bst_index import BinarySearchTreeIndex
@@ -56,8 +57,8 @@ class AVLTreeIndex(BinarySearchTreeIndex):
         y.left = t2 
 
         #update heights
-        y.height = self._tree_height(y)
-        current.height = self._tree_height(current)
+        y.height = 1 + max(self._height(y.left), self._height(y.right))
+        current.height =  1 + max(self._height(current.left), self._height(current.right))
 
         return current
 
@@ -80,8 +81,8 @@ class AVLTreeIndex(BinarySearchTreeIndex):
         x.right = t2 
 
         #update heights
-        x.height = self._tree_height(x)
-        current.height = self._tree_height(current)
+        x.height = 1 + max(self._height(x.left), self._height(x.right))
+        current.height =  1 + max(self._height(current.left), self._height(current.right))
 
         return current
 
@@ -104,25 +105,27 @@ class AVLTreeIndex(BinarySearchTreeIndex):
             return node
         current = super()._insert_recursive(current, key, value)
         
-        current.height = self._tree_height(current) #update height of tree @ current node
-        balance_factor = self._height(current.right) - self._height(current.left)  #find balance factor @ current node
+        current.height = 1 + max(self._height(current.left), self._height(current.right)) #update height of tree @ current node
+        balance_factor = self._height(current.left) - self._height(current.right)  #find balance factor @ current node
 
         #determine if any rotations of the tree with the newly added node are needed based on the above calculated balance factor:
         #1. too many nodes inserted to the left (LL and LR cases):
-        if balance_factor <= -2:    
+        if balance_factor >= 2:    
             if key < current.left.key: #LL
                 return self._rotate_right(current)
             elif current.key > current.left.key: #LR 
+                current.left = self._rotate_left(current.left)
                 return self._rotate_right(current) 
-            else: current.right.add_value(value)
+            else: current.left.add_value(value)
 
         #2. too many nodes inserted to the right (RR and RL cases):
-        elif balance_factor >= 2:
+        elif balance_factor <= -2:
             if key > current.right.key: #RR
                 return self._rotate_left(current)
             elif key < current.right.key: #RL
-                return self._rotate_right(current)
-            else: current.left.add_value(value)
+                current.right = self._rotate_right(current.right)
+                return self._rotate_left(current)
+            else: current.right.add_value(value)
         else:
             return current
         
@@ -147,16 +150,17 @@ class AVLTreeIndex(BinarySearchTreeIndex):
 
 
     def _inorder_traversal(self, current: Optional[AVLNode], result: List[Any]) -> None:
-        if current is None:
-            return
+         if current is None:
+             return
         
-        self._inorder_traversal(current.left, result)
-        result.append(current.key)
-        self._inorder_traversal(current.right, result)
-      
-    def get_keys(self) -> List[Any]:
-        keys: List[Any] = [] 
-        self._inorder_traversal(self.root, keys)
-        return keys
+         self._inorder_traversal(current.left, result)
+         result.append(current.key)
+         self._inorder_traversal(current.right, result)
+
+   
+    # def get_keys(self) -> List[Any]:
+    #     keys: List[Any] = [] 
+    #     self._inorder_traversal(self.root, keys)
+    #     return keys
     
 

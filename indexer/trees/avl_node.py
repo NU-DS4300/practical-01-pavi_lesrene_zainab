@@ -16,4 +16,6 @@ class AVLNode(BSTNode):
     """
     def __init__(self, key: Any):
         super().__init__(key)
+        self.left: Optional['AVLNode'] = None
+        self.right: Optional['AVLNode'] = None
         self.height: int = 1

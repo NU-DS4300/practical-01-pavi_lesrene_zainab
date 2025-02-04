@@ -40,7 +40,8 @@ def generate_search_data(index: AbstractIndex, n: int): #-> List[str]
 def generate_experiment_datasets(index: AbstractIndex): #-> List[List[str]]
     datasets = [] 
     for i in range(10): # assignment asked that we make 8 or more search datasets
-        n = generate_n(seed=42+i) 
+        n = generate_n(seed=42+i)
+        #n = generate_n(seed=42+i+i*2) 
         dataset = generate_search_data(index, n)
         datasets.append(dataset)
     return datasets, n

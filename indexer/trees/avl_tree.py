@@ -1,5 +1,5 @@
 import string
-from typing import List, Optional, Any
+from typing import List, Optional, Tuple, Any
 
 from indexer.trees.bst_index import BinarySearchTreeIndex
 from indexer.trees.avl_node import AVLNode
@@ -156,6 +156,22 @@ class AVLTreeIndex(BinarySearchTreeIndex):
          self._inorder_traversal(current.left, result)
          result.append(current.key)
          self._inorder_traversal(current.right, result)
+         
+
+    def get_balance_factors(self, current: Optional[AVLNode], result: List[Tuple[Any, int]]) -> None:
+        
+        balance_factors = [] 
+
+        if current is None:
+            return
+    
+        self._inorder_traversal(current.left, result)
+        balance_factor = self._height(current.left) - self._height(current.right)
+        balance_factors.append((current.key, balance_factor))
+        self._inorder_traversal(current.right, result)
+        return balance_factors, self.get_keys_in_order()
+        
+    
 
    
     # def get_keys(self) -> List[Any]:

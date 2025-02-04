@@ -57,11 +57,14 @@ class HashMapIndex(AbstractIndex):
         return len(self.get_keys_in_order())
     
     def get_avg_value_list_len(self):
+        element_lens = []
         list_len_sum = 0
         num_keys = 0
         for element in self.buckets:
-            list_len_sum += len(element[1])
-            num_keys += 1  
-        return (list_len_sum / num_keys)
+            if element is not None:
+                element_lens.append(len(element[1]))
+                list_len_sum += len(element[1])
+                num_keys += 1  
+        return (list_len_sum / num_keys), element_lens 
 
 

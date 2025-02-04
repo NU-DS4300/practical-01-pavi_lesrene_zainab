@@ -1,4 +1,5 @@
 from typing import Optional, Any, List, Generator
+from collections import deque
 
 from indexer.abstract_index import AbstractIndex
 from indexer.trees.bst_node import BSTNode
@@ -191,7 +192,7 @@ class BinarySearchTreeIndex(AbstractIndex):
         """
         return self._tree_height(self.root)
     
-    def get_keys_in_order(self) -> List[Any]:
+    def get_keys_in_order(self) -> List[Any]: 
         """
         Returns a list of keys in the binary search tree in ascending order.
 
@@ -227,3 +228,31 @@ class BinarySearchTreeIndex(AbstractIndex):
             num_keys = num_keys + 1
             
         return (list_len_sum / num_keys)
+    
+    def get_node_depths(self) -> List[int]:
+        """
+        Returns a list of depths for all nodes in the binary search tree using an iterative BFS approach.
+        
+        Returns:
+            List[int]: A list containing the depth of each node.
+        """
+        if self.root is None:
+            return []
+        
+        depths = []
+        queue = deque([(self.root, 0)])  # Queue stores (node, depth)
+        
+        while queue:
+            node, depth = queue.popleft()  # Process front of the queue
+            depths.append(depth)
+            
+            if node.left:
+                queue.append((node.left, depth + 1))  # Add left child with updated depth
+            if node.right:
+                queue.append((node.right, depth + 1))  # Add right child with updated depth
+        
+        return depths
+    
+    
+    
+    

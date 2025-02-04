@@ -202,15 +202,15 @@ def main():
     print(index.get_keys_in_order())
     tokens = len(index.get_keys_in_order())
     
-    """
+
     
-    for i in range(10): 
+    for i in range(5): 
         datasets, n = generate_experiment_datasets(index)
         for dataset in datasets:
             log_timing_data(
                 index_type=choice,
                 uid=uuid.uuid1(), 
-                num_docs=306242, 
+                num_docs=122395, # doing only Jan & Feb files
                 num_tokens=tokens, 
                 search_set_size=n, 
                 search_function=search,
@@ -218,7 +218,7 @@ def main():
                 search_set = dataset
             )
 
-"""       
+       
     
 
 

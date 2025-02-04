@@ -46,6 +46,7 @@ class AVLTreeIndex(BinarySearchTreeIndex):
         Returns:
             AVLNode: The new root of the rotated subtree.
         """
+        
         #current = new node just added
         current = y.left #y > current
         t2 = current.right #T2 > current and T2 < y

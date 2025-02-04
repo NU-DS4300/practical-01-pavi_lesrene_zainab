@@ -68,7 +68,8 @@ class BinarySearchTreeIndex(AbstractIndex):
         """
         
         if node is None:
-            raise KeyError(f"Key {key} not found in the tree.")
+            #raise KeyError(f"Key {key} not found in the tree.")
+            return None
         if key < node.key:
             return self._search_recursive(node.left, key)
         elif key > node.key:

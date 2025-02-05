@@ -157,18 +157,17 @@ class AVLTreeIndex(BinarySearchTreeIndex):
          self._inorder_traversal(current.right, result)
          
 
-    def get_balance_factors(self, current: Optional[AVLNode], result: List[Tuple[Any, int]]) -> None:
-        
-        balance_factors = [] 
+    def get_balance_factors(self, current: Optional[AVLNode]) -> List[Tuple[Any, int]]:
 
         if current is None:
-            return
-    
-        self._inorder_traversal(current.left, result)
+            return []
+        
+        left_factors = self.get_balance_factors(current.left)
         balance_factor = self._height(current.left) - self._height(current.right)
-        balance_factors.append((current.key, balance_factor))
-        self._inorder_traversal(current.right, result)
-        return balance_factors, self.get_keys_in_order()
+        current_factor = [(current.key, balance_factor)]
+        right_factors = self.get_balance_factors(current.right)
+        
+        return left_factors + current_factor + right_factors
         
     
 

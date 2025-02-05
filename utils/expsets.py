@@ -11,8 +11,7 @@ from indexer.abstract_index import AbstractIndex
 import string
 
 # generates a random n that is a multiple of 4 and is greater than or equal to 4000
-def generate_n(seed=42): #-> int
-    random.seed(seed) # makes sure that we always get the same random number so that datasets of the same sizes are always created
+def generate_n(): #-> int
     return random.randint(1000, 10000) * 4 
 
 # generates the search datasets made up of the A,B,C,D components that were asked of us in the assignment 
@@ -40,8 +39,7 @@ def generate_search_data(index: AbstractIndex, n: int): #-> List[str]
 def generate_experiment_datasets(index: AbstractIndex): #-> List[List[str]]
     datasets = [] 
     for i in range(10): # assignment asked that we make 8 or more search datasets
-        n = generate_n(seed=42+i)
-        #n = generate_n(seed=42+i+i*2) 
+        n = generate_n() 
         dataset = generate_search_data(index, n)
         datasets.append(dataset)
     return datasets, n

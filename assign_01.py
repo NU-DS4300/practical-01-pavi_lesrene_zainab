@@ -210,7 +210,7 @@ def main():
             log_timing_data(
                 index_type=choice,
                 uid=uuid.uuid1(), 
-                num_docs=122395, # doing only Jan & Feb files
+                num_docs=179851, # doing only Jan, Feb, & March files
                 num_tokens=tokens, 
                 search_set_size=n, 
                 search_function=search,
@@ -219,8 +219,6 @@ def main():
             )
 
        
-    
-
 
 if __name__ == "__main__":
     main()
